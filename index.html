@@ -2,19 +2,28 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Rate My Crochet</title>
+<title>Crochet Brand Rating</title>
 
 <style>
-
 body{
 margin:0;
-font-family:Poppins, sans-serif;
-background:linear-gradient(135deg,#ffd6e8,#fff4cc,#d6f6ff);
+font-family:Poppins,sans-serif;
 height:100vh;
+overflow:hidden;
 display:flex;
 justify-content:center;
 align-items:center;
-overflow:hidden;
+background:#fff4f0;
+position:relative;
+}
+
+canvas#yarn{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+z-index:0;
 }
 
 .card{
@@ -23,12 +32,21 @@ padding:35px;
 border-radius:25px;
 text-align:center;
 box-shadow:0 10px 35px rgba(0,0,0,0.2);
-width:300px;
+width:340px;
 z-index:2;
+position:relative;
 }
 
 h2{
 margin-top:0;
+}
+
+input{
+padding:10px;
+border-radius:10px;
+border:1px solid #ddd;
+width:90%;
+margin-bottom:15px;
 }
 
 .stars{
@@ -51,21 +69,14 @@ color:#FFD93D;
 
 .flower{
 font-size:60px;
-display:none;
 margin-top:15px;
-animation:pop 0.5s ease;
-}
-
-@keyframes pop{
-0%{transform:scale(0)}
-100%{transform:scale(1)}
+display:none;
 }
 
 .hearts{
 position:absolute;
 font-size:20px;
 animation:float 3s linear infinite;
-opacity:0.7;
 }
 
 @keyframes float{
@@ -73,79 +84,226 @@ opacity:0.7;
 100%{transform:translateY(-800px);opacity:0;}
 }
 
+.avg{
+margin-top:10px;
+font-size:14px;
+color:#666;
+}
+
+button{
+background:#ff6fa8;
+color:white;
+border:none;
+padding:10px 20px;
+border-radius:20px;
+cursor:pointer;
+margin-top:10px;
+}
+
+button:hover{
+background:#ff4f8b;
+}
+
+/* Mascot popup */
+#mascot{
+position:fixed;
+bottom:10px;
+right:10px;
+background:#ffedf5;
+padding:15px;
+border-radius:20px;
+box-shadow:0 5px 15px rgba(0,0,0,0.2);
+font-size:16px;
+animation:popIn 1s forwards;
+z-index:3;
+}
+
+@keyframes popIn{
+0%{transform:scale(0);}
+100%{transform:scale(1);}
+}
+
+/* Scratch card */
+#scratchContainer{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.6);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:5;
+}
+
+#scratchCard{
+width:300px;
+height:180px;
+background:#fff;
+border-radius:20px;
+text-align:center;
+padding:20px;
+position:relative;
+overflow:hidden;
+box-shadow:0 5px 25px rgba(0,0,0,0.3);
+}
+
+#scratchText{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+font-size:22px;
+font-weight:bold;
+color:#ff4f8b;
+}
+
+canvas#scratchLayer{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+cursor:pointer;
+}
 </style>
 </head>
 
 <body>
 
+<canvas id="yarn"></canvas>
+
 <div class="card">
-
-<h2>🌼 Rate my crochet</h2>
-<p>Tap a star ⭐</p>
-
+<h2>🌼 Rate my Crochet</h2>
+<input id="name" placeholder="Your name (optional)">
 <div class="stars">
-
 <span class="star" onclick="rate(1)">★</span>
 <span class="star" onclick="rate(2)">★</span>
 <span class="star" onclick="rate(3)">★</span>
 <span class="star" onclick="rate(4)">★</span>
 <span class="star" onclick="rate(5)">★</span>
-
 </div>
 
 <div class="flower" id="flower">
-🌻🧶🌸  
+🌸🧶🌻  
 <br>
 Thank you for supporting handmade!
 </div>
 
+<div class="avg">
+⭐ Average rating: <span id="avg">Loading...</span>
+</div>
+
+<button onclick="follow()">Follow on Instagram</button>
+</div>
+
+<div id="mascot">🐰 Hi there! Welcome to my crochet stall 🌸</div>
+
+<!-- Scratch Card -->
+<div id="scratchContainer">
+  <div id="scratchCard">
+    <canvas id="scratchLayer"></canvas>
+    <div id="scratchText"></div>
+  </div>
 </div>
 
 <script>
+var scriptURL="https://script.google.com/macros/s/AKfycby9hG1EugHHmDTIGKIhG-tnDzESXStK0f3MrbxTt5yrOoZyNRMPr0alRkhlCiybm6I/exec";
 
-var scriptURL="https://script.google.com/macros/s/AKfycby9hG1EugHHmDTIGKIhG-tnDzESXStK0f3MrbxTt5yrOoZyNRMPr0alRkhlCiybm6I/exec"
-
+// ⭐ Rate stars
 function rate(n){
-
 let stars=document.querySelectorAll(".star");
-
-stars.forEach((s,i)=>{
-if(i<n){
-s.classList.add("active");
-}
-})
-
-fetch(scriptURL+"?rating="+n);
-
-if(n==5){
+stars.forEach((s,i)=>{if(i<n) s.classList.add("active");});
+var name=document.getElementById("name").value;
+fetch(scriptURL+"?rating="+n+"&name="+name);
 document.getElementById("flower").style.display="block";
 launchHearts();
+showScratchCard();
 }
 
-}
-
+// 💖 Hearts animation
 function launchHearts(){
-
 for(let i=0;i<20;i++){
-
 let heart=document.createElement("div");
 heart.innerHTML="💖";
 heart.className="hearts";
-
 heart.style.left=Math.random()*100+"%";
 heart.style.animationDuration=(2+Math.random()*3)+"s";
-
 document.body.appendChild(heart);
-
-setTimeout(()=>{
-heart.remove();
-},3000);
-
+setTimeout(()=>{heart.remove();},3000);
+}
 }
 
+// 📱 Instagram
+function follow(){
+window.open("https://instagram.com/_buzz.buz","_blank")
 }
+
+// 🧵 Yarn background
+const canvas=document.getElementById('yarn');
+const ctx=canvas.getContext('2d');
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+let threads=[];
+for(let i=0;i<50;i++){
+threads.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,length:50+Math.random()*50,speed:1+Math.random()*2,angle:Math.random()*Math.PI*2,color:`hsl(${Math.random()*360},70%,80%)`});
+}
+function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);
+threads.forEach(t=>{ctx.beginPath();ctx.strokeStyle=t.color;ctx.lineWidth=2;ctx.moveTo(t.x,t.y);ctx.lineTo(t.x+Math.cos(t.angle)*t.length,t.y+Math.sin(t.angle)*t.length);ctx.stroke();
+t.x+=Math.cos(t.angle)*t.speed;t.y+=Math.sin(t.angle)*t.speed;
+if(t.x>canvas.width||t.x<0||t.y>canvas.height||t.y<0){t.x=Math.random()*canvas.width;t.y=Math.random()*canvas.height;}
+});requestAnimationFrame(draw);}
+draw();
+
+// 🐰 Mascot disappears
+setTimeout(()=>{ document.getElementById('mascot').style.display='none'; },5000);
+
+// 🎉 Scratch card
+var scratchContainer=document.getElementById("scratchContainer");
+var scratchLayer=document.getElementById("scratchLayer");
+var scratchText=document.getElementById("scratchText");
+
+function showScratchCard(){
+scratchContainer.style.display="flex";
+
+// Random prize
+var prizes=["₹20 off next order","₹25 off next order","₹15 off next order"];
+scratchText.textContent=prizes[Math.floor(Math.random()*prizes.length)];
+
+// Setup scratch canvas
+scratchLayer.width=300;
+scratchLayer.height=180;
+var ctxScratch=scratchLayer.getContext("2d");
+ctxScratch.fillStyle="#c0c0c0";
+ctxScratch.fillRect(0,0,scratchLayer.width,scratchLayer.height);
+ctxScratch.globalCompositeOperation='destination-out';
+
+let scratching=false;
+
+scratchLayer.addEventListener('mousedown',()=>{scratching=true;});
+scratchLayer.addEventListener('mouseup',()=>{scratching=false;});
+scratchLayer.addEventListener('mousemove',(e)=>{
+  if(!scratching) return;
+  ctxScratch.beginPath();
+  ctxScratch.arc(e.offsetX,e.offsetY,15,0,Math.PI*2);
+  ctxScratch.fill();
+});
+scratchLayer.addEventListener('touchstart',(e)=>{scratching=true;});
+scratchLayer.addEventListener('touchend',(e)=>{scratching=false;});
+scratchLayer.addEventListener('touchmove',(e)=>{
+  if(!scratching) return;
+  let rect=scratchLayer.getBoundingClientRect();
+  let x=e.touches[0].clientX-rect.left;
+  let y=e.touches[0].clientY-rect.top;
+  ctxScratch.beginPath();
+  ctxScratch.arc(x,y,15,0,Math.PI*2);
+  ctxScratch.fill();
+});
+}
+
+scratchContainer.addEventListener("click",()=>{scratchContainer.style.display="none";});
 
 </script>
-
 </body>
 </html>
