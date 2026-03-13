@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rate My Crochet 🌼</title>
+
+<style>
+
+body{
+margin:0;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+font-family: "Poppins", sans-serif;
+background: linear-gradient(135deg,#ffd6e8,#fff6cc,#d6f5ff);
+}
+
+.card{
+background:white;
+padding:40px;
+border-radius:30px;
+text-align:center;
+box-shadow:0 15px 40px rgba(0,0,0,0.15);
+width:320px;
+}
+
+h1{
+font-size:26px;
+margin-bottom:10px;
+}
+
+.subtitle{
+color:#777;
+margin-bottom:25px;
+}
+
+.stars{
+font-size:42px;
+}
+
+.star{
+cursor:pointer;
+color:#ddd;
+transition:transform 0.2s,color 0.2s;
+}
+
+.star:hover{
+transform:scale(1.4);
+}
+
+.active{
+color:#FFD93D;
+animation:bounce 0.4s;
+}
+
+@keyframes bounce{
+0%{transform:scale(1)}
+50%{transform:scale(1.6)}
+100%{transform:scale(1)}
+}
+
+.thankyou{
+margin-top:25px;
+font-size:18px;
+color:#ff4f8b;
+display:none;
+animation:fade 0.5s;
+}
+
+@keyframes fade{
+from{opacity:0}
+to{opacity:1}
+}
+
+.flower{
+font-size:30px;
+margin-bottom:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<div class="flower">🌼🧶🌸</div>
+
+<h1>Rate your crochet</h1>
+
+<div class="subtitle">
+Tap a star ⭐
+</div>
+
+<div class="stars">
+
+<span class="star" onclick="rate(1)">★</span>
+<span class="star" onclick="rate(2)">★</span>
+<span class="star" onclick="rate(3)">★</span>
+<span class="star" onclick="rate(4)">★</span>
+<span class="star" onclick="rate(5)">★</span>
+
+</div>
+
+<div class="thankyou" id="msg">
+💛 Thank you for supporting handmade crochet! 🧶
+</div>
+
+</div>
+
+<script>
+
+function rate(n){
+
+let stars=document.querySelectorAll(".star");
+
+stars.forEach((s,i)=>{
+
+if(i<n){
+s.classList.add("active");
+}else{
+s.classList.remove("active");
+}
+
+});
+
+document.getElementById("msg").style.display="block";
+
+}
+
+</script>
+
+</body>
+</html>
